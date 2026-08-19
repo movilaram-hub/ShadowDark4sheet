@@ -92,14 +92,9 @@ function checkHpDeath(charIdx, currentHp) {
   }
 }
 
-// Navegación con animación de deslizamiento (Slider)
+// Navegación de pestañas con carrusel
 function navigateTab(charIdx, direction) {
   activeTabs[charIdx] = (activeTabs[charIdx] + direction + 4) % 4;
-  updateTabPosition(charIdx);
-}
-
-function setTab(charIdx, tabIndex) {
-  activeTabs[charIdx] = Math.max(0, Math.min(3, tabIndex));
   updateTabPosition(charIdx);
 }
 
@@ -117,7 +112,6 @@ function updateTabPosition(charIdx) {
     indicator.textContent = TAB_NAMES[targetIndex];
   }
 
-  // Redimensionar textareas de la pestaña activa
   setTimeout(() => {
     document.querySelectorAll(`#tab-${charIdx}-${targetIndex} textarea`).forEach(autoResize);
   }, 100);
@@ -264,11 +258,10 @@ function removeCharacter(index) {
   renderParty();
 }
 
-// GESTOS TÁCTILES CON ARRASTRE REAL (Interactive Carousel Swipe)
+// GESTOS TÁCTILES CON ARRASTRE REAL
 function attachSwipeListeners(viewportElement, charIdx) {
   let touchStartX = 0;
   let touchStartY = 0;
-  let currentTranslateX = 0;
   let isDragging = false;
 
   viewportElement.addEventListener('touchstart', (e) => {
@@ -283,7 +276,6 @@ function attachSwipeListeners(viewportElement, charIdx) {
     const diffX = touchCurrentX - touchStartX;
     const diffY = touchCurrentY - touchStartY;
 
-    // Si el movimiento es horizontal, mover el carrusel con el dedo
     if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 8) {
       isDragging = true;
       const slider = document.getElementById(`tabs-slider-${charIdx}`);
@@ -304,14 +296,14 @@ function attachSwipeListeners(viewportElement, charIdx) {
     const touchEndX = e.changedTouches[0].clientX;
     const diffX = touchEndX - touchStartX;
     const containerWidth = viewportElement.offsetWidth || 300;
-    const threshold = containerWidth * 0.18; // Mínimo 18% de arrastre para cambiar pestaña
+    const threshold = containerWidth * 0.18;
 
     if (diffX < -threshold) {
-      navigateTab(charIdx, 1);  // Deslizar izquierda -> siguiente
+      navigateTab(charIdx, 1);
     } else if (diffX > threshold) {
-      navigateTab(charIdx, -1); // Deslizar derecha -> anterior
+      navigateTab(charIdx, -1);
     } else {
-      updateTabPosition(charIdx); // Rebotar a la pestaña actual si no se superó el umbral
+      updateTabPosition(charIdx);
     }
   }, { passive: true });
 }
@@ -528,16 +520,22 @@ function renderParty() {
   document.querySelectorAll('textarea').forEach(autoResize);
 }
 
-// Modales
+// ================= CONTROL DE MODALES (DADOS Y ORÁCULO) =================
 function openModal(modalId) {
-  document.getElementById(modalId).classList.add('active');
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.add('active');
+  }
 }
 
 function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('active');
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('active');
+  }
 }
 
-// Dados
+// ================= LANZADOR DE DADOS =================
 function rollDie(sides) {
   if (isRolling) return;
   isRolling = true;
@@ -606,7 +604,7 @@ function renderDiceHistory() {
   `).join('');
 }
 
-// Oráculo
+// ================= ORÁCULO =================
 function getOracleAnswer(roll) {
   switch(roll) {
     case 1:  return { text: "¡NO! Y ADEMÁS...!", type: "red-crit" };
@@ -730,7 +728,6 @@ async function exportJSON() {
 
   const blob = new Blob([jsonString], { type: "application/json" });
 
-  // 1. Si estamos en móvil y soporta compartir archivos nativo de iOS (Guardar en Archivos)
   if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: "application/json" })] })) {
     try {
       const file = new File([blob], fileName, { type: "application/json" });
@@ -744,12 +741,11 @@ async function exportJSON() {
       if (err.name !== 'AbortError') {
         console.warn("Fallback a descarga directa");
       } else {
-        return; // El usuario canceló la ventana compartir
+        return;
       }
     }
   }
 
-  // 2. Método estándar por Blob (PC / Android / Safari Mac)
   const url = URL.createObjectURL(blob);
   const downloadAnchor = document.createElement('a');
   downloadAnchor.href = url;
@@ -782,22 +778,15 @@ function importJSON(event) {
     }
   };
   reader.readAsText(file);
-  event.target.value = ''; // Reset para permitir cargar el mismo archivo sucesivamente
+  event.target.value = '';
 }
 
-// Inicialización
+// ================= INICIALIZACIÓN =================
 document.addEventListener('DOMContentLoaded', () => {
   charactersData = [createDefaultCharacter("PJ 1")];
   renderParty();
 
-  document.getElementById('addCharBtn').addEventListener('click', addCharacter);
-  document.getElementById('exportBtn').addEventListener('click', exportJSON);
-  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
-  document.getElementById('importFile').addEventListener('change', importJSON);
-
-  document.getElementById('openDiceBtn').addEventListener('click', () => openModal('diceModal'));
-  document.getElementById('openOracleBtn').addEventListener('click', () => openModal('oracleModal'));
-  
+  // Cerrar modal al pulsar fuera
   window.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
       e.target.classList.remove('active');
