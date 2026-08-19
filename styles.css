@@ -26,8 +26,7 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Evitar zoom por doble toque involuntario en controles */
-button, input, textarea, .hp-box, .stat-small-box, .ability-box {
+button, input, textarea, .hp-box, .stat-small-box, .ability-box, .file-upload-label {
   touch-action: manipulation;
 }
 
@@ -40,7 +39,6 @@ body {
   overflow: hidden;
 }
 
-/* Ocultar spinners numéricos */
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
@@ -127,6 +125,14 @@ header h1 {
 .top-btn:hover {
   background-color: var(--accent);
   color: #000;
+}
+
+.file-upload-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
 }
 
 .add-btn {
@@ -255,24 +261,24 @@ header h1 {
 /* ================= CONTENEDOR CARRUSEL DE PESTAÑAS ================= */
 .tabs-viewport {
   width: 100%;
-  overflow: hidden; /* Oculta las pestañas fuera de vista */
+  overflow: hidden;
   position: relative;
-  touch-action: pan-y; /* Permite scroll vertical y captura horizontal libre */
+  touch-action: pan-y;
 }
 
 .tabs-slider {
   display: flex;
-  width: 400%; /* 4 pestañas = 400% */
+  width: 400%;
   transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: transform;
 }
 
 .tabs-slider.no-transition {
-  transition: none !important; /* Para arrastre fluido en tiempo real */
+  transition: none !important;
 }
 
 .tab-slide {
-  width: 25%; /* 100% del viewport por pestaña */
+  width: 25%;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -297,7 +303,7 @@ header h1 {
   gap: 6px;
 }
 
-/* ================= PESTAÑA 1: COMBATE ================= */
+/* PESTAÑA 1: COMBATE */
 .vital-stats {
   display: grid;
   grid-template-columns: 1.35fr 1fr;
@@ -588,7 +594,7 @@ header h1 {
 .weapon-row input:focus { border-color: var(--accent); }
 .weapon-row input::placeholder { color: #6d6d7e; font-weight: 500; }
 
-/* ================= PESTAÑA 2: INFORMACIÓN ================= */
+/* PESTAÑA 2: INFORMACIÓN */
 .info-row {
   display: flex;
   flex-direction: column;
@@ -635,7 +641,7 @@ header h1 {
   font-family: inherit;
 }
 
-/* ================= PESTAÑA 3: EQUIPO ================= */
+/* PESTAÑA 3: EQUIPO */
 .coins-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -724,7 +730,7 @@ header h1 {
   outline: none;
 }
 
-/* ================= PESTAÑA 4: MAGIAS Y TALENTOS ================= */
+/* PESTAÑA 4: MAGIAS Y TALENTOS */
 .dynamic-header-btns {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -862,14 +868,16 @@ header h1 {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(3px);
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
   justify-content: center;
   align-items: center;
 }
 
-.modal-overlay.active { display: flex; }
+.modal-overlay.active {
+  display: flex !important;
+}
 
 .modal-card {
   background: #181820;
@@ -918,8 +926,9 @@ header h1 {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   cursor: pointer;
+  padding: 4px;
 }
 .close-modal-btn:hover { color: #fff; }
 
@@ -1030,7 +1039,7 @@ header h1 {
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* ================= ORÁCULO ================= */
+/* ORÁCULO */
 .oracle-odds-selector {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1193,9 +1202,7 @@ header h1 {
   }
 }
 
-/* Ajustes específicos para móviles */
 @media (max-width: 600px) {
-  /* Arma arriba y Ataque abajo */
   .weapon-row {
     grid-template-columns: 1fr !important;
     gap: 4px;
@@ -1206,21 +1213,12 @@ header h1 {
     padding: 8px 10px;
   }
 
-  /* Info y Trasfondo: Apilar Nivel, Clase, Linaje, etc. en 1 sola columna */
   .info-grid-2 {
     grid-template-columns: 1fr !important;
     gap: 6px;
   }
 
-  /* Prevenir zoom involuntario en iOS */
   input, textarea, select {
     font-size: 16px !important;
   }
-}
-.file-upload-label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  user-select: none;
 }
