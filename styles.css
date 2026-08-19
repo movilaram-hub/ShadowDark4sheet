@@ -30,13 +30,17 @@ button, input, textarea, .hp-box, .stat-small-box, .ability-box, .file-upload-la
   touch-action: manipulation;
 }
 
+/* ================= ESTRUCTURA BASE Y SCROLL ================= */
 body {
   background-color: var(--bg-color);
   color: var(--text);
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh; /* Altura dinámica real para navegadores móviles */
   overflow: hidden;
+  position: fixed; /* Evita que el teclado o tabulador desplace la app entera */
+  width: 100%;
 }
 
 input[type=number]::-webkit-inner-spin-button, 
@@ -60,6 +64,7 @@ header {
   flex-wrap: wrap;
   gap: 8px 12px;
   flex-shrink: 0;
+  z-index: 10;
 }
 
 .header-left {
@@ -163,7 +168,8 @@ header h1 {
   gap: 10px;
   padding: 10px;
   flex-grow: 1;
-  height: calc(100vh - 52px);
+  height: calc(100dvh - 56px);
+  min-height: 0; /* Permite a los hijos flex encogerse y calcular scroll real */
 }
 
 .party-grid[data-cols="1"] { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; width: 100%; }
@@ -171,7 +177,7 @@ header h1 {
 .party-grid[data-cols="3"] { grid-template-columns: repeat(3, 1fr); }
 .party-grid[data-cols="4"] { grid-template-columns: repeat(4, 1fr); }
 
-/* Ficha individual */
+/* Ficha individual con scroll fluido nativo */
 .character-card {
   background-color: var(--card-bg);
   border: 2px solid var(--card-border);
@@ -181,7 +187,9 @@ header h1 {
   flex-direction: column;
   gap: 10px;
   overflow-y: auto;
-  max-height: 100%;
+  -webkit-overflow-scrolling: touch; /* Scroll fluido nativo en iOS */
+  overscroll-behavior-y: contain; /* Evita arrastre no deseado del fondo */
+  height: 100%;
   position: relative;
 }
 
@@ -264,11 +272,13 @@ header h1 {
   overflow: hidden;
   position: relative;
   touch-action: pan-y;
+  flex-grow: 1;
 }
 
 .tabs-slider {
   display: flex;
   width: 400%;
+  align-items: flex-start; /* Permite que cada pestaña tenga su propia altura */
   transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: transform;
 }
@@ -283,6 +293,7 @@ header h1 {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-bottom: 40px; /* Margen inferior para ver todas las ranuras sin cortes */
 }
 
 .box-label {
