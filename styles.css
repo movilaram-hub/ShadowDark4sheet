@@ -1217,3 +1217,10 @@ header h1 {
     font-size: 16px !important;
   }
 }
+.file-upload-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
