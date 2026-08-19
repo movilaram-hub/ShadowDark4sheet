@@ -30,7 +30,7 @@ button, input, textarea, .hp-box, .stat-small-box, .ability-box, .file-upload-la
   touch-action: manipulation;
 }
 
-/* ================= ESTRUCTURA BASE FLUIDA (SCROLL INFINITO NATURAL) ================= */
+/* ================= ESTRUCTURA BASE ================= */
 html {
   min-height: 100%;
 }
@@ -43,7 +43,7 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
-  overflow-y: auto; /* Permite scroll natural en toda la pantalla */
+  overflow-y: auto;
   width: 100%;
 }
 
@@ -57,7 +57,7 @@ input[type=number] {
   appearance: textfield;
 }
 
-/* ================= HEADER STICKY (SIEMPRE VISIBLE ARRIBA) ================= */
+/* ================= HEADER FIJO SUPERIOR ================= */
 header {
   background-color: #16161c;
   border-bottom: 2px solid var(--card-border);
@@ -71,6 +71,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
 }
 
 .header-left {
@@ -168,22 +169,36 @@ header h1 {
   }
 }
 
-/* ================= GRID PRINCIPAL ================= */
+/* ================= GRID PRINCIPAL PROPORCIONADO ================= */
 .party-grid {
   display: grid;
   gap: 12px;
   padding: 12px;
-  flex-grow: 1;
   width: 100%;
-  align-items: start; /* Permite que cada columna se estire según su propio contenido */
+  max-width: 1600px;
+  margin: 0 auto;
+  align-items: start;
 }
 
-.party-grid[data-cols="1"] { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; width: 100%; }
-.party-grid[data-cols="2"] { grid-template-columns: repeat(2, 1fr); max-width: 1000px; margin: 0 auto; width: 100%; }
-.party-grid[data-cols="3"] { grid-template-columns: repeat(3, 1fr); }
-.party-grid[data-cols="4"] { grid-template-columns: repeat(4, 1fr); }
+/* Distribución proporcionada según cantidad de columnas */
+.party-grid[data-cols="1"] { 
+  grid-template-columns: minmax(0, 440px); 
+  justify-content: center; 
+}
+.party-grid[data-cols="2"] { 
+  grid-template-columns: repeat(2, minmax(0, 440px)); 
+  justify-content: center; 
+}
+.party-grid[data-cols="3"] { 
+  grid-template-columns: repeat(3, minmax(0, 1fr)); 
+  justify-content: center; 
+}
+.party-grid[data-cols="4"] { 
+  grid-template-columns: repeat(4, minmax(0, 1fr)); 
+  justify-content: center; 
+}
 
-/* Ficha individual de personaje */
+/* ================= FICHA INDIVIDUAL DE PERSONAJE ================= */
 .character-card {
   background-color: var(--card-bg);
   border: 2px solid var(--card-border);
@@ -192,7 +207,9 @@ header h1 {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  height: auto; /* Crece hacia abajo sin restricciones */
+  width: 100%;
+  min-width: 0; /* Evita que los inputs ensanchen la columna */
+  height: auto;
   position: relative;
 }
 
@@ -270,7 +287,7 @@ header h1 {
   margin-bottom: 2px;
 }
 
-/* ================= CONTENEDOR CARRUSEL DE PESTAÑAS ================= */
+/* ================= CARRUSEL DE PESTAÑAS ================= */
 .tabs-viewport {
   width: 100%;
   overflow: hidden;
@@ -605,6 +622,7 @@ header h1 {
   font-weight: 700;
   padding: 7px 8px;
   outline: none;
+  min-width: 0;
 }
 
 .weapon-row input:focus { border-color: var(--accent); }
@@ -625,6 +643,7 @@ header h1 {
   font-size: 0.85rem;
   padding: 6px 8px;
   outline: none;
+  min-width: 0;
 }
 
 .info-grid-2 {
@@ -744,6 +763,7 @@ header h1 {
   font-size: 0.8rem;
   padding: 6px 8px;
   outline: none;
+  min-width: 0;
 }
 
 /* PESTAÑA 4: MAGIAS Y TALENTOS */
@@ -820,6 +840,7 @@ header h1 {
   padding: 3px 6px;
   border-radius: 3px;
   outline: none;
+  min-width: 0;
 }
 
 .spell-toggle-btn {
@@ -1188,25 +1209,11 @@ header h1 {
   margin: auto;
 }
 
-/* ================= RESPONSIVE Y MÓVILES ================= */
-@media (max-width: 1200px) {
-  .vital-stats {
-    display: flex;
-    flex-direction: column;
-  }
-  .side-vitals {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5px;
-  }
-  .ability-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-}
-
-@media (max-width: 800px) {
+/* ================= RESPONSIVE MÓVILES (APILADO EN 1 COLUMNA) ================= */
+@media (max-width: 768px) {
   .party-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    max-width: 480px;
   }
 }
 
