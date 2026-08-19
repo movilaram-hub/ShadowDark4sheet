@@ -17,6 +17,12 @@ let diceHistory = [];
 let oracleHistory = [];
 let isRolling = false;
 
+// Estado del Temporizador de Antorcha
+let torchTotalSeconds = 0;
+let torchRemainingSeconds = 0;
+let torchInterval = null;
+let isTorchPaused = false;
+
 // Estructura de personaje por defecto
 function createDefaultCharacter(name = "Personaje") {
   const stats = {};
@@ -520,7 +526,7 @@ function renderParty() {
   document.querySelectorAll('textarea').forEach(autoResize);
 }
 
-// ================= CONTROL DE MODALES (DADOS Y ORÁCULO) =================
+// ================= MODALES =================
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {
@@ -720,7 +726,131 @@ function renderOracleHistory() {
   `).join('');
 }
 
-// ================= EXPORTAR / GUARDAR (Compatible con iOS y PC) =================
+// ================= TEMPORIZADOR DE ANTORCHA (LÓGICA Y EFECTOS) =================
+function startTorch(minutes) {
+  clearInterval(torchInterval);
+  torchTotalSeconds = minutes * 60;
+  torchRemainingSeconds = torchTotalSeconds;
+  isTorchPaused = false;
+  
+  document.getElementById('torchPauseBtn').textContent = '⏸ Pausar';
+  updateTorchDisplay();
+
+  torchInterval = setInterval(() => {
+    if (!isTorchPaused) {
+      torchRemainingSeconds--;
+      if (torchRemainingSeconds <= 0) {
+        torchRemainingSeconds = 0;
+        extinguishTorch(false);
+      }
+      updateTorchDisplay();
+    }
+  }, 1000);
+}
+
+function togglePauseTorch() {
+  if (torchRemainingSeconds <= 0) return;
+  isTorchPaused = !isTorchPaused;
+  const btn = document.getElementById('torchPauseBtn');
+  btn.textContent = isTorchPaused ? '▶ Reanudar' : '⏸ Pausar';
+  
+  const statusBanner = document.getElementById('torchStatusBanner');
+  if (isTorchPaused) {
+    statusBanner.textContent = '⏸ En Pausa';
+  } else {
+    updateTorchDisplay();
+  }
+}
+
+function extinguishTorch(manual = false) {
+  clearInterval(torchInterval);
+  torchInterval = null;
+  torchRemainingSeconds = 0;
+  isTorchPaused = false;
+
+  updateTorchDisplay();
+
+  if (!manual) {
+    // Disparar pantalla de apagón dramático al extinguirse naturalmente
+    triggerBlackoutScreen();
+  }
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function updateTorchDisplay() {
+  const headerBtn = document.getElementById('openTorchBtn');
+  const headerText = document.getElementById('headerTorchText');
+  const displayArea = document.getElementById('torchDisplayArea');
+  const fireGraphic = document.getElementById('torchFireGraphic');
+  const timerText = document.getElementById('torchTimerText');
+  const statusBanner = document.getElementById('torchStatusBanner');
+  const progressFill = document.getElementById('torchProgressFill');
+
+  timerText.textContent = formatTime(torchRemainingSeconds);
+
+  // Limpiar clases de estado
+  displayArea.className = 'torch-display-area';
+  
+  if (torchRemainingSeconds <= 0) {
+    // Apagada
+    headerBtn.classList.remove('burning');
+    headerText.textContent = 'Antorcha';
+    fireGraphic.textContent = '🪵';
+    statusBanner.textContent = 'Apagada (En la Oscuridad)';
+    statusBanner.style.color = 'var(--text-muted)';
+    progressFill.style.width = '0%';
+    return;
+  }
+
+  // Encendida activa
+  headerBtn.classList.add('burning');
+  headerText.textContent = formatTime(torchRemainingSeconds);
+  displayArea.classList.add('torch-burning');
+  fireGraphic.textContent = '🔥';
+
+  // Porcentaje de combustión
+  const percent = (torchRemainingSeconds / torchTotalSeconds) * 100;
+  progressFill.style.width = `${percent}%`;
+
+  // Efectos según tiempo restante
+  if (torchRemainingSeconds <= 60) {
+    // Menos de 1 minuto: CRÍTICO
+    displayArea.classList.add('torch-critical-1min');
+    statusBanner.textContent = '⚠️ ¡A PUNTO DE EXTINGUIRSE! ⚠️';
+    statusBanner.style.color = '#ff3333';
+  } else if (torchRemainingSeconds <= 300) {
+    // Menos de 5 minutos: ADVERTENCIA
+    displayArea.classList.add('torch-warning-5min');
+    statusBanner.textContent = '🔥 ¡La llama parpadea y vacila!';
+    statusBanner.style.color = '#ff8800';
+  } else {
+    // Tiempo normal
+    statusBanner.textContent = 'Llama brillante y estable';
+    statusBanner.style.color = '#ffaa44';
+  }
+}
+
+function triggerBlackoutScreen() {
+  closeModal('torchModal');
+  const blackout = document.getElementById('blackoutScreen');
+  if (blackout) {
+    blackout.classList.add('active');
+  }
+}
+
+function dismissBlackout() {
+  const blackout = document.getElementById('blackoutScreen');
+  if (blackout) {
+    blackout.classList.remove('active');
+  }
+}
+
+// ================= EXPORTAR / GUARDAR =================
 async function exportJSON() {
   snapshotCurrentInputs();
   const jsonString = JSON.stringify(charactersData, null, 2);
@@ -759,7 +889,7 @@ async function exportJSON() {
   }, 150);
 }
 
-// ================= IMPORTAR / CARGAR (Compatible con iOS y PC) =================
+// ================= IMPORTAR / CARGAR =================
 function importJSON(event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
@@ -786,7 +916,6 @@ document.addEventListener('DOMContentLoaded', () => {
   charactersData = [createDefaultCharacter("PJ 1")];
   renderParty();
 
-  // Cerrar modal al pulsar fuera
   window.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
       e.target.classList.remove('active');
