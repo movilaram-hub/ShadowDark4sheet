@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shadowdark Sheet</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <h1>Shadowdark Sheet</h1>
+      <div class="quick-tools">
+        <button class="tool-btn" id="openDiceBtn" title="Lanzador de dados">🎲 Dados</button>
+        <button class="tool-btn" id="openOracleBtn" title="Consultar Oráculo">🔮 Oráculo</button>
+      </div>
+    </div>
+    
+    <div class="btn-group">
+      <button class="top-btn add-btn" id="addCharBtn">➕ Añadir PJ</button>
+      <button class="top-btn" id="exportBtn">📥 Guardar JSON</button>
+      <button class="top-btn" id="importBtn">📤 Cargar JSON</button>
+      <input type="file" id="importFile" accept=".json" style="display: none;">
+    </div>
+  </header>
+
+  <main class="party-grid" id="partyContainer"></main>
+
+  <div class="modal-overlay" id="diceModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>🎲 Tirada de Dados</h2>
+        <button class="close-modal-btn" onclick="closeModal('diceModal')">✕</button>
+      </div>
+      
+      <div class="dice-selector">
+        <button class="dice-btn" onclick="rollDie(2)">d2</button>
+        <button class="dice-btn" onclick="rollDie(4)">d4</button>
+        <button class="dice-btn" onclick="rollDie(6)">d6</button>
+        <button class="dice-btn" onclick="rollDie(8)">d8</button>
+        <button class="dice-btn" onclick="rollDie(10)">d10</button>
+        <button class="dice-btn" onclick="rollDie(12)">d12</button>
+        <button class="dice-btn primary-die" onclick="rollDie(20)">d20</button>
+        <button class="dice-btn" onclick="rollDie(100)">d100</button>
+      </div>
+
+      <div class="dice-display-area" id="diceDisplayArea">
+        <div class="die-label" id="currentDieLabel">Elige un dado</div>
+        <div class="die-result" id="currentDieResult">-</div>
+        <div class="die-crit-text" id="critBanner"></div>
+      </div>
+
+      <div class="dice-history-section">
+        <span class="box-label">Historial de Tiradas (Últimas 10)</span>
+        <div class="history-list" id="diceHistoryList">
+          <div class="history-empty">Sin tiradas recientes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="oracleModal">
+    <div class="modal-card oracle-modal-card">
+      <div class="modal-header">
+        <h2>🔮 Oráculo del Destino</h2>
+        <button class="close-modal-btn" onclick="closeModal('oracleModal')">✕</button>
+      </div>
+
+      <div class="oracle-odds-selector">
+        <button class="oracle-btn" onclick="askOracle('unlikely')">
+          <span>Poco Probable</span>
+          <small>2d20 (Menor)</small>
+        </button>
+        <button class="oracle-btn primary-oracle" onclick="askOracle('even')">
+          <span>50%</span>
+          <small>1d20</small>
+        </button>
+        <button class="oracle-btn" onclick="askOracle('likely')">
+          <span>Casi Seguro</span>
+          <small>2d20 (Mayor)</small>
+        </button>
+      </div>
+
+      <div class="oracle-display-area" id="oracleDisplayArea">
+        <div class="oracle-dice-details" id="oracleDiceDetails">Haz tu pregunta y elige la probabilidad</div>
+        <div class="oracle-result-number" id="oracleResultNum">-</div>
+        <div class="oracle-answer-text" id="oracleAnswerText">Esperando consulta...</div>
+      </div>
+
+      <div class="dice-history-section">
+        <span class="box-label">Historial del Oráculo</span>
+        <div class="history-list" id="oracleHistoryList">
+          <div class="history-empty">Sin respuestas previas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
