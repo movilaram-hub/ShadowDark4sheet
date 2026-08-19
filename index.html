@@ -14,6 +14,10 @@
       <div class="quick-tools">
         <button type="button" class="tool-btn" id="openDiceBtn" onclick="openModal('diceModal')" title="Lanzador de dados">🎲 Dados</button>
         <button type="button" class="tool-btn" id="openOracleBtn" onclick="openModal('oracleModal')" title="Consultar Oráculo">🔮 Oráculo</button>
+        <button type="button" class="tool-btn torch-tool-btn" id="openTorchBtn" onclick="openModal('torchModal')" title="Temporizador de Antorcha">
+          <span class="torch-icon" id="headerTorchIcon">🔥</span>
+          <span id="headerTorchText">Antorcha</span>
+        </button>
       </div>
     </div>
     
@@ -94,6 +98,49 @@
           <div class="history-empty">Sin respuestas previas</div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="torchModal">
+    <div class="modal-card torch-modal-card">
+      <div class="modal-header">
+        <h2>🔥 Fuente de Luz en Tiempo Real</h2>
+        <button type="button" class="close-modal-btn" onclick="closeModal('torchModal')">✕</button>
+      </div>
+
+      <div class="torch-presets">
+        <button type="button" class="torch-preset-btn" onclick="startTorch(60)">
+          <span>🔥 Encender Antorcha</span>
+          <small>1 Hora (60 min)</small>
+        </button>
+        <button type="button" class="torch-preset-btn" onclick="startTorch(30)">
+          <span>🕯️ Encender Luz Menor</span>
+          <small>30 Minutos</small>
+        </button>
+      </div>
+
+      <div class="torch-display-area" id="torchDisplayArea">
+        <div class="torch-fire-anim" id="torchFireGraphic">🪵</div>
+        <div class="torch-timer-number" id="torchTimerText">00:00</div>
+        <div class="torch-status-banner" id="torchStatusBanner">Apagada (En la Oscuridad)</div>
+        <div class="torch-progress-bar-bg">
+          <div class="torch-progress-bar-fill" id="torchProgressFill"></div>
+        </div>
+      </div>
+
+      <div class="torch-action-controls">
+        <button type="button" class="torch-ctrl-btn pause" id="torchPauseBtn" onclick="togglePauseTorch()">⏸ Pausar</button>
+        <button type="button" class="torch-ctrl-btn extinguish" onclick="extinguishTorch(true)">💨 Apagar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="blackout-screen" id="blackoutScreen" onclick="dismissBlackout()">
+    <div class="blackout-content">
+      <div class="blackout-icon">☠️ 💨 🕯️</div>
+      <h1>¡LA LUZ SE HA EXTINGUIDO!</h1>
+      <p>Estáis en la oscuridad absoluta de la Shadowdark.</p>
+      <small>(Toca en cualquier parte para cerrar)</small>
     </div>
   </div>
 
