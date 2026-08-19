@@ -30,20 +30,15 @@ button, input, textarea, .hp-box, .stat-small-box, .ability-box, .file-upload-la
   touch-action: manipulation;
 }
 
-/* ================= ESTRUCTURA BASE ================= */
-html {
-  min-height: 100%;
-}
-
+/* ================= ESTRUCTURA COMPACTA PRINCIPAL ================= */
 body {
   background-color: var(--bg-color);
   color: var(--text);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow-x: hidden;
-  overflow-y: auto;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -57,7 +52,7 @@ input[type=number] {
   appearance: textfield;
 }
 
-/* ================= HEADER FIJO SUPERIOR ================= */
+/* ================= HEADER RESPONSIVE ================= */
 header {
   background-color: #16161c;
   border-bottom: 2px solid var(--card-border);
@@ -68,10 +63,7 @@ header {
   flex-wrap: wrap;
   gap: 8px 12px;
   flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  width: 100%;
+  z-index: 10;
 }
 
 .header-left {
@@ -169,54 +161,43 @@ header h1 {
   }
 }
 
-/* ================= GRID PRINCIPAL PROPORCIONADO ================= */
+/* ================= GRID DE COLUMNAS (ORIGINAL COMPACTO) ================= */
 .party-grid {
   display: grid;
-  gap: 12px;
-  padding: 12px;
-  width: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  align-items: start;
+  gap: 10px;
+  padding: 10px;
+  flex-grow: 1;
+  height: calc(100vh - 52px);
+  height: calc(100dvh - 52px);
+  min-height: 0;
 }
 
-/* Distribución proporcionada según cantidad de columnas */
-.party-grid[data-cols="1"] { 
-  grid-template-columns: minmax(0, 440px); 
-  justify-content: center; 
-}
-.party-grid[data-cols="2"] { 
-  grid-template-columns: repeat(2, minmax(0, 440px)); 
-  justify-content: center; 
-}
-.party-grid[data-cols="3"] { 
-  grid-template-columns: repeat(3, minmax(0, 1fr)); 
-  justify-content: center; 
-}
-.party-grid[data-cols="4"] { 
-  grid-template-columns: repeat(4, minmax(0, 1fr)); 
-  justify-content: center; 
-}
+.party-grid[data-cols="1"] { grid-template-columns: minmax(0, 480px); justify-content: center; }
+.party-grid[data-cols="2"] { grid-template-columns: repeat(2, minmax(0, 480px)); justify-content: center; }
+.party-grid[data-cols="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.party-grid[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
-/* ================= FICHA INDIVIDUAL DE PERSONAJE ================= */
+/* Ficha individual de personaje */
 .character-card {
   background-color: var(--card-bg);
   border: 2px solid var(--card-border);
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 6px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 100%;
-  min-width: 0; /* Evita que los inputs ensanchen la columna */
-  height: auto;
+  height: 100%;
+  max-height: 100%;
   position: relative;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .char-header {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .nav-tab-btn {
@@ -225,8 +206,8 @@ header h1 {
   color: var(--accent);
   font-size: 0.95rem;
   font-weight: bold;
-  width: 28px;
-  height: 32px;
+  width: 26px;
+  height: 30px;
   border-radius: 4px;
   cursor: pointer;
   display: flex;
@@ -247,8 +228,8 @@ header h1 {
   color: #ff6666;
   font-size: 0.85rem;
   font-weight: bold;
-  width: 26px;
-  height: 32px;
+  width: 24px;
+  height: 30px;
   border-radius: 4px;
   cursor: pointer;
   display: flex;
@@ -269,7 +250,7 @@ header h1 {
   color: var(--accent);
   font-weight: bold;
   font-size: 0.95rem;
-  padding: 6px 8px;
+  padding: 5px 6px;
   border-radius: 4px;
   text-align: center;
   outline: none;
@@ -277,29 +258,30 @@ header h1 {
 }
 
 .tab-indicator {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   color: var(--text-muted);
   text-align: center;
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.5px;
-  margin-top: -4px;
-  margin-bottom: 2px;
+  margin-top: -6px;
+  flex-shrink: 0;
 }
 
-/* ================= CARRUSEL DE PESTAÑAS ================= */
+/* ================= CARRUSEL CON SCROLL INTERNO ================= */
 .tabs-viewport {
   width: 100%;
+  flex-grow: 1;
+  min-height: 0;
   overflow: hidden;
   position: relative;
   touch-action: pan-y;
-  height: auto;
 }
 
 .tabs-slider {
   display: flex;
   width: 400%;
-  align-items: flex-start;
+  height: 100%;
   transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: transform;
 }
@@ -310,12 +292,15 @@ header h1 {
 
 .tab-slide {
   width: 25%;
+  height: 100%;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-bottom: 16px;
-  box-sizing: border-box;
+  overflow-y: auto; /* Scroll vertical independiente dentro de cada pestaña */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding-right: 2px; /* Margen para la barra de scroll */
 }
 
 .box-label {
@@ -329,11 +314,11 @@ header h1 {
 .section-box {
   background: var(--input-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 6px;
-  padding: 10px;
+  border-radius: 4px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* PESTAÑA 1: COMBATE */
@@ -346,8 +331,8 @@ header h1 {
 .hp-box {
   background: var(--input-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 6px;
-  padding: 8px 4px;
+  border-radius: 4px;
+  padding: 6px 4px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -402,7 +387,7 @@ header h1 {
   color: var(--text);
   font-size: 1.2rem;
   font-weight: bold;
-  width: 26px;
+  width: 24px;
   height: 38px;
   border-radius: 4px;
   cursor: pointer;
@@ -462,7 +447,7 @@ header h1 {
 .stat-small-box {
   background: var(--input-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 4px 6px;
   text-align: center;
   display: flex;
@@ -533,8 +518,8 @@ header h1 {
 .ability-box {
   background: var(--input-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 6px;
-  padding: 6px 3px;
+  border-radius: 4px;
+  padding: 5px 3px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -600,7 +585,7 @@ header h1 {
 .combat-section {
   background: var(--input-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 8px;
   display: flex;
   flex-direction: column;
@@ -671,7 +656,7 @@ header h1 {
 }
 
 .background-textarea {
-  min-height: 90px;
+  min-height: 80px;
   resize: vertical;
   font-family: inherit;
 }
@@ -760,8 +745,8 @@ header h1 {
   border: 1px solid #3c3c4a;
   border-radius: 3px;
   color: #fff;
-  font-size: 0.8rem;
-  padding: 6px 8px;
+  font-size: 0.75rem;
+  padding: 4px 6px;
   outline: none;
   min-width: 0;
 }
@@ -1209,11 +1194,33 @@ header h1 {
   margin: auto;
 }
 
-/* ================= RESPONSIVE MÓVILES (APILADO EN 1 COLUMNA) ================= */
-@media (max-width: 768px) {
+/* ================= RESPONSIVE Y MÓVILES ================= */
+@media (max-width: 1200px) {
+  .vital-stats {
+    display: flex;
+    flex-direction: column;
+  }
+  .side-vitals {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
+  .ability-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 800px) {
+  body {
+    overflow-y: auto;
+    height: auto;
+  }
   .party-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
-    max-width: 480px;
+    grid-template-columns: 1fr !important;
+    height: auto;
+  }
+  .character-card {
+    height: 680px; /* Altura cómoda y fija para scroll en móvil */
   }
 }
 
