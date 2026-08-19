@@ -722,36 +722,67 @@ function renderOracleHistory() {
   `).join('');
 }
 
-// JSON
-function exportJSON() {
+// ================= EXPORTAR / GUARDAR (Compatible con iOS y PC) =================
+async function exportJSON() {
   snapshotCurrentInputs();
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(charactersData, null, 2));
+  const jsonString = JSON.stringify(charactersData, null, 2);
+  const fileName = `shadowdark_party_${new Date().toISOString().slice(0, 10)}.json`;
+
+  const blob = new Blob([jsonString], { type: "application/json" });
+
+  // 1. Si estamos en móvil y soporta compartir archivos nativo de iOS (Guardar en Archivos)
+  if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: "application/json" })] })) {
+    try {
+      const file = new File([blob], fileName, { type: "application/json" });
+      await navigator.share({
+        files: [file],
+        title: "Shadowdark Sheet",
+        text: "Copia de seguridad de personajes Shadowdark"
+      });
+      return;
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.warn("Fallback a descarga directa");
+      } else {
+        return; // El usuario canceló la ventana compartir
+      }
+    }
+  }
+
+  // 2. Método estándar por Blob (PC / Android / Safari Mac)
+  const url = URL.createObjectURL(blob);
   const downloadAnchor = document.createElement('a');
-  downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `shadowdark_party_${new Date().toISOString().slice(0, 10)}.json`);
+  downloadAnchor.href = url;
+  downloadAnchor.download = fileName;
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
-  downloadAnchor.remove();
+
+  setTimeout(() => {
+    document.body.removeChild(downloadAnchor);
+    URL.revokeObjectURL(url);
+  }, 150);
 }
 
+// ================= IMPORTAR / CARGAR (Compatible con iOS y PC) =================
 function importJSON(event) {
-  const file = event.target.files[0];
+  const file = event.target.files && event.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const partyData = JSON.parse(e.target.result);
-      if (!Array.isArray(partyData)) throw new Error("Formato JSON inválido");
+      if (!Array.isArray(partyData)) throw new Error("El archivo no contiene una lista válida de personajes.");
 
       charactersData = partyData.slice(0, MAX_CHARS);
       renderParty();
+      alert("¡Grupo cargado con éxito!");
     } catch (err) {
       alert('Error al leer el archivo JSON: ' + err.message);
     }
   };
   reader.readAsText(file);
-  event.target.value = '';
+  event.target.value = ''; // Reset para permitir cargar el mismo archivo sucesivamente
 }
 
 // Inicialización
