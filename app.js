@@ -421,17 +421,13 @@ function renderParty() {
                     <input type="number" id="xp-next-${i}" value="${char.xp_next || '10'}" placeholder="10">
                   </div>
                 </div>
-              </div>
-              <div class="info-grid-2">
                 <div class="info-row"><span class="box-label">Clase</span><input type="text" id="class-${i}" value="${char.char_class || ''}" placeholder="Guerrero..."></div>
                 <div class="info-row"><span class="box-label">Linaje</span><input type="text" id="ancestry-${i}" value="${char.ancestry || ''}" placeholder="Humano..."></div>
-              </div>
-              <div class="info-grid-2">
                 <div class="info-row"><span class="box-label">Título</span><input type="text" id="title-${i}" value="${char.title || ''}" placeholder="Valiente..."></div>
                 <div class="info-row"><span class="box-label">Alineamiento</span><input type="text" id="alignment-${i}" value="${char.alignment || ''}" placeholder="Legal..."></div>
+                <div class="info-row"><span class="box-label">Deidad</span><input type="text" id="deity-${i}" value="${char.deity || ''}" placeholder="Ghaele..."></div>
+                <div class="info-row"><span class="box-label">Trasfondo</span><textarea class="background-textarea" id="background-${i}" placeholder="Historia, origen...">${char.background || ''}</textarea></div>
               </div>
-              <div class="info-row"><span class="box-label">Deidad</span><input type="text" id="deity-${i}" value="${char.deity || ''}" placeholder="Ghaele..."></div>
-              <div class="info-row"><span class="box-label">Trasfondo</span><textarea class="background-textarea" id="background-${i}" placeholder="Historia, origen...">${char.background || ''}</textarea></div>
             </div>
           </div>
 
@@ -515,7 +511,6 @@ function renderParty() {
         </div>
       </div>
     `;
-
     container.appendChild(card);
     const viewport = card.querySelector(`#tabs-viewport-${i}`);
     if (viewport) {
@@ -942,6 +937,27 @@ function importJSON(event) {
   reader.readAsText(file);
   event.target.value = '';
 }
+
+// ================= AUTO-HIDE HEADER EN SCROLL =================
+let lastScrollPosition = 0;
+
+window.addEventListener('scroll', () => {
+  const header = document.querySelector('header');
+  if (!header) return;
+  const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+  if (window.innerWidth <= 820) {
+    if (currentScroll > lastScrollPosition && currentScroll > 60) {
+      header.classList.add('header-hidden');
+    } else {
+      header.classList.remove('header-hidden');
+    }
+  } else {
+    header.classList.remove('header-hidden');
+  }
+
+  lastScrollPosition = currentScroll <= 0 ? 0 : currentScroll;
+}, { passive: true });
 
 // ================= INICIALIZACIÓN =================
 document.addEventListener('DOMContentLoaded', () => {
