@@ -381,7 +381,7 @@ function renderParty() {
                 const val = char.stats?.[stat] ?? 10;
                 return `
                   <div class="ability-box">
-                    <span class="box-label">${stat}</span>
+                    <span class="box-label ability-clickable-label" onclick="rollAbilityCheck(${i}, '${stat}')" title="Tirar 1d20 + mod de ${stat}">🎲 ${stat}</span>
                     <div class="mod-tag-large" id="mod-${i}-${stat}">${getMod(val)}</div>
                     <div class="ability-row">
                       <button type="button" class="step-btn" onclick="changeVal('stat-${i}-${stat}', -1, true, ${i}, '${stat}')">−</button>
@@ -515,7 +515,6 @@ function renderParty() {
         </div>
       </div>
     `;
-
     container.appendChild(card);
     const viewport = card.querySelector(`#tabs-viewport-${i}`);
     if (viewport) {
@@ -541,8 +540,19 @@ function closeModal(modalId) {
   }
 }
 
-// ================= LANZADOR DE DADOS =================
-function rollDie(sides) {
+// Tirada directa al pulsar sobre una habilidad (FUE, DES, etc.)
+function rollAbilityCheck(charIdx, stat) {
+  const statInput = document.getElementById(`stat-${charIdx}-${stat}`);
+  const val = statInput ? parseInt(statInput.value, 10) : 10;
+  const mod = Math.floor(((isNaN(val) ? 10 : val) - 10) / 2);
+  const charName = document.getElementById(`name-${charIdx}`)?.value || `PJ ${charIdx + 1}`;
+
+  openModal('diceModal');
+  rollDie(20, mod, stat, charName);
+}
+
+// ================= LANZADOR DE DADOS CON MODIFICADOR =================
+function rollDie(sides, mod = 0, statLabel = '', charName = '') {
   if (isRolling) return;
   isRolling = true;
 
@@ -550,7 +560,13 @@ function rollDie(sides) {
   const labelEl = document.getElementById('currentDieLabel');
   const bannerEl = document.getElementById('critBanner');
 
-  labelEl.textContent = `Lanzando 1d${sides}...`;
+  if (statLabel) {
+    const sign = mod >= 0 ? `+${mod}` : `${mod}`;
+    labelEl.textContent = `${charName} · Prueba de ${statLabel} (1d20 ${sign})`;
+  } else {
+    labelEl.textContent = `Lanzando 1d${sides}...`;
+  }
+
   bannerEl.textContent = '';
   resultEl.className = 'die-result die-rolling';
 
@@ -560,37 +576,49 @@ function rollDie(sides) {
     counter++;
     if (counter > 12) {
       clearInterval(rollInterval);
-      finalizeRoll(sides);
+      finalizeRoll(sides, mod, statLabel, charName);
     }
   }, 50);
 }
 
-function finalizeRoll(sides) {
+function finalizeRoll(sides, mod = 0, statLabel = '', charName = '') {
   const resultEl = document.getElementById('currentDieResult');
   const labelEl = document.getElementById('currentDieLabel');
   const bannerEl = document.getElementById('critBanner');
   
-  const finalVal = Math.floor(Math.random() * sides) + 1;
-  resultEl.textContent = finalVal;
+  const naturalRoll = Math.floor(Math.random() * sides) + 1;
+  const total = naturalRoll + mod;
+  
+  resultEl.textContent = total;
   resultEl.className = 'die-result';
-  labelEl.textContent = `Resultado 1d${sides}`;
+
+  if (statLabel) {
+    const sign = mod >= 0 ? `+${mod}` : `${mod}`;
+    labelEl.textContent = `Dado [${naturalRoll}] ${sign} ${statLabel} = ${total}`;
+  } else {
+    labelEl.textContent = `Resultado 1d${sides}`;
+  }
 
   let critClass = '';
   if (sides === 20) {
-    if (finalVal === 20) {
+    if (naturalRoll === 20) {
       resultEl.classList.add('crit-success-anim');
-      bannerEl.textContent = '★ ¡CRÍTICO! ★';
+      bannerEl.textContent = '★ ¡CRÍTICO (20 NATURAL)! ★';
       bannerEl.style.color = '#ffd700';
       critClass = 'crit-20';
-    } else if (finalVal === 1) {
+    } else if (naturalRoll === 1) {
       resultEl.classList.add('crit-fail-anim');
-      bannerEl.textContent = '☠ ¡PIFIA! ☠';
+      bannerEl.textContent = '☠ ¡PIFIA (1 NATURAL)! ☠';
       bannerEl.style.color = '#ff3333';
       critClass = 'crit-1';
     }
   }
 
-  diceHistory.unshift({ die: `1d${sides}`, val: finalVal, critClass: critClass });
+  const histEntry = statLabel 
+    ? { die: `1d20${mod >= 0 ? '+' : ''}${mod} (${statLabel})`, val: total, critClass: critClass }
+    : { die: `1d${sides}`, val: naturalRoll, critClass: critClass };
+
+  diceHistory.unshift(histEntry);
   if (diceHistory.length > 10) diceHistory.pop();
   renderDiceHistory();
 
@@ -733,7 +761,8 @@ function startTorch(minutes) {
   torchRemainingSeconds = torchTotalSeconds;
   isTorchPaused = false;
   
-  document.getElementById('torchPauseBtn').textContent = '⏸ Pausar';
+  const pauseBtn = document.getElementById('torchPauseBtn');
+  if (pauseBtn) pauseBtn.textContent = '⏸ Pausar';
   updateTorchDisplay();
 
   torchInterval = setInterval(() => {
@@ -752,13 +781,15 @@ function togglePauseTorch() {
   if (torchRemainingSeconds <= 0) return;
   isTorchPaused = !isTorchPaused;
   const btn = document.getElementById('torchPauseBtn');
-  btn.textContent = isTorchPaused ? '▶ Reanudar' : '⏸ Pausar';
+  if (btn) btn.textContent = isTorchPaused ? '▶ Reanudar' : '⏸ Pausar';
   
   const statusBanner = document.getElementById('torchStatusBanner');
-  if (isTorchPaused) {
-    statusBanner.textContent = '⏸ En Pausa';
-  } else {
-    updateTorchDisplay();
+  if (statusBanner) {
+    if (isTorchPaused) {
+      statusBanner.textContent = '⏸ En Pausa';
+    } else {
+      updateTorchDisplay();
+    }
   }
 }
 
@@ -771,7 +802,6 @@ function extinguishTorch(manual = false) {
   updateTorchDisplay();
 
   if (!manual) {
-    // Disparar pantalla de apagón dramático al extinguirse naturalmente
     triggerBlackoutScreen();
   }
 }
@@ -791,47 +821,48 @@ function updateTorchDisplay() {
   const statusBanner = document.getElementById('torchStatusBanner');
   const progressFill = document.getElementById('torchProgressFill');
 
-  timerText.textContent = formatTime(torchRemainingSeconds);
+  if (!timerText || !displayArea) return;
 
-  // Limpiar clases de estado
+  timerText.textContent = formatTime(torchRemainingSeconds);
   displayArea.className = 'torch-display-area';
   
   if (torchRemainingSeconds <= 0) {
-    // Apagada
-    headerBtn.classList.remove('burning');
-    headerText.textContent = 'Antorcha';
-    fireGraphic.textContent = '🪵';
-    statusBanner.textContent = 'Apagada (En la Oscuridad)';
-    statusBanner.style.color = 'var(--text-muted)';
-    progressFill.style.width = '0%';
+    if (headerBtn) headerBtn.classList.remove('burning');
+    if (headerText) headerText.textContent = 'Antorcha';
+    if (fireGraphic) fireGraphic.textContent = '🪵';
+    if (statusBanner) {
+      statusBanner.textContent = 'Apagada (En la Oscuridad)';
+      statusBanner.style.color = 'var(--text-muted)';
+    }
+    if (progressFill) progressFill.style.width = '0%';
     return;
   }
 
-  // Encendida activa
-  headerBtn.classList.add('burning');
-  headerText.textContent = formatTime(torchRemainingSeconds);
+  if (headerBtn) headerBtn.classList.add('burning');
+  if (headerText) headerText.textContent = formatTime(torchRemainingSeconds);
   displayArea.classList.add('torch-burning');
-  fireGraphic.textContent = '🔥';
+  if (fireGraphic) fireGraphic.textContent = '🔥';
 
-  // Porcentaje de combustión
   const percent = (torchRemainingSeconds / torchTotalSeconds) * 100;
-  progressFill.style.width = `${percent}%`;
+  if (progressFill) progressFill.style.width = `${percent}%`;
 
-  // Efectos según tiempo restante
   if (torchRemainingSeconds <= 60) {
-    // Menos de 1 minuto: CRÍTICO
     displayArea.classList.add('torch-critical-1min');
-    statusBanner.textContent = '⚠️ ¡A PUNTO DE EXTINGUIRSE! ⚠️';
-    statusBanner.style.color = '#ff3333';
+    if (statusBanner) {
+      statusBanner.textContent = '⚠️ ¡A PUNTO DE EXTINGUIRSE! ⚠️';
+      statusBanner.style.color = '#ff3333';
+    }
   } else if (torchRemainingSeconds <= 300) {
-    // Menos de 5 minutos: ADVERTENCIA
     displayArea.classList.add('torch-warning-5min');
-    statusBanner.textContent = '🔥 ¡La llama parpadea y vacila!';
-    statusBanner.style.color = '#ff8800';
+    if (statusBanner) {
+      statusBanner.textContent = '🔥 ¡La llama parpadea y vacila!';
+      statusBanner.style.color = '#ff8800';
+    }
   } else {
-    // Tiempo normal
-    statusBanner.textContent = 'Llama brillante y estable';
-    statusBanner.style.color = '#ffaa44';
+    if (statusBanner) {
+      statusBanner.textContent = 'Llama brillante y estable';
+      statusBanner.style.color = '#ffaa44';
+    }
   }
 }
 
@@ -915,6 +946,19 @@ function importJSON(event) {
 document.addEventListener('DOMContentLoaded', () => {
   charactersData = [createDefaultCharacter("PJ 1")];
   renderParty();
+
+  document.getElementById('addCharBtn').addEventListener('click', addCharacter);
+  document.getElementById('exportBtn').addEventListener('click', exportJSON);
+  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', importJSON);
+
+  document.getElementById('openDiceBtn').addEventListener('click', () => openModal('diceModal'));
+  document.getElementById('openOracleBtn').addEventListener('click', () => openModal('oracleModal'));
+  
+  const torchBtn = document.getElementById('openTorchBtn');
+  if (torchBtn) {
+    torchBtn.addEventListener('click', () => openModal('torchModal'));
+  }
 
   window.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
