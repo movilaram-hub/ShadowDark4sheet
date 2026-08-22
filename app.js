@@ -515,6 +515,7 @@ function renderParty() {
         </div>
       </div>
     `;
+
     container.appendChild(card);
     const viewport = card.querySelector(`#tabs-viewport-${i}`);
     if (viewport) {
