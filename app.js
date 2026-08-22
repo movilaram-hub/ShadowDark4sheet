@@ -947,19 +947,6 @@ document.addEventListener('DOMContentLoaded', () => {
   charactersData = [createDefaultCharacter("PJ 1")];
   renderParty();
 
-  document.getElementById('addCharBtn').addEventListener('click', addCharacter);
-  document.getElementById('exportBtn').addEventListener('click', exportJSON);
-  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
-  document.getElementById('importFile').addEventListener('change', importJSON);
-
-  document.getElementById('openDiceBtn').addEventListener('click', () => openModal('diceModal'));
-  document.getElementById('openOracleBtn').addEventListener('click', () => openModal('oracleModal'));
-  
-  const torchBtn = document.getElementById('openTorchBtn');
-  if (torchBtn) {
-    torchBtn.addEventListener('click', () => openModal('torchModal'));
-  }
-
   window.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
       e.target.classList.remove('active');
